@@ -1,7 +1,11 @@
 package src;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Task {
     public record File(
@@ -16,21 +20,75 @@ public class Task {
      * Task 1
      */
     public static List<String> leafFiles(List<File> files) {
-        return new ArrayList<>();
+        List<String> leafNodes = new ArrayList<String>();
+        HashMap<String, Integer> parentMap = new HashMap<String, Integer>();
+        for (File file : files) {
+            if (!parentMap.containsValue(file.parent) && file.parent != -1) {
+                parentMap.put(file.name, file.parent);
+            }
+        }
+
+        for (File file: files) {
+            if (!parentMap.containsValue(file.id)) {
+                leafNodes.add(file.name);
+            }
+        }
+        return leafNodes;
     }
 
     /**
      * Task 2
      */
     public static List<String> kLargestCategories(List<File> files, int k) {
-        return new ArrayList<>();
+        HashMap<String,Integer> categoriesCount = new HashMap<String, Integer>();
+        for (File file: files) {
+            for (String category: file.categories) {
+                if (categoriesCount.containsKey(category)) {
+                    // Incrementing count of category in the hashmap
+                    categoriesCount.put(category, categoriesCount.get(category) + 1);
+                } else {
+                    categoriesCount.put(category, 1);
+                }
+            }
+        }
+
+        // Convert the HashMap to a List
+        List<Map.Entry<String, Integer>> entryList = new ArrayList<>(categoriesCount.entrySet());
+
+        Comparator<Map.Entry<String, Integer>> customComparator = (category1, category2) -> {
+            int valueComparison = category2.getValue().compareTo(category1.getValue());
+            if (valueComparison != 0) {
+                return valueComparison;
+            } else {
+                // If values are the same, compare keys alphabetically
+                return category1.getKey().compareTo(category2.getKey()); 
+            }
+        };
+
+        Collections.sort(entryList, customComparator);
+
+        List<String> sortedCategories = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : entryList) {
+            sortedCategories.add(entry.getKey());
+        }
+
+        if (sortedCategories.size() > k) {
+            sortedCategories.subList(k, sortedCategories.size()).clear();
+        }
+
+        return sortedCategories;
+
     }
 
     /**
      * Task 3
      */
     public static int largestFileSize(List<File> files) {
-        return 0;
+        if (files.size() == 0) {
+            return 0;
+        }
+
+        return 1;
     }
 
     public static void main(String[] args) {
@@ -51,6 +109,7 @@ public class Task {
         
         List<String> leafFiles = leafFiles(testFiles);
         leafFiles.sort(null);
+
         assert leafFiles.equals(List.of(
             "Audio.mp3",
             "Backup.zip",
@@ -66,6 +125,7 @@ public class Task {
         assert kLargestCategories(testFiles, 3).equals(List.of(
             "Documents", "Folder", "Media"
         ));
+
 
         assert largestFileSize(testFiles) == 20992;
     }
