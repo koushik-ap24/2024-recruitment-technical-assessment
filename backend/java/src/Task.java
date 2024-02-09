@@ -88,7 +88,46 @@ public class Task {
             return 0;
         }
 
-        return 1;
+        HashMap<Integer, File> fileMap = new HashMap<>();
+        for (File file : files) {
+            fileMap.put(file.id(), file);
+        }
+
+        int largestTotalSize = 0;
+
+        // Iterate through files to find root files and start recursion
+        // Drawing on BFS to start from the root folders and branching out sequentially by layers.
+        // Assums one file cannot have multiple parents (similar to )
+        for (File file : files) {
+            if (file.parent() == -1) {
+                int totalSize = calculateTotalSize(file, fileMap);
+                largestTotalSize = Math.max(largestTotalSize, totalSize);
+            }
+        }
+
+        return largestTotalSize;
+        //return 1;
+    }
+
+    // Recursive function to calculate total size of file and its children
+    private static int calculateTotalSize(File file, HashMap<Integer, File> fileMap) {
+        int totalSize = file.size();
+        for (int childId : getChildIds(file, fileMap)) {
+            File child = fileMap.get(childId);
+            totalSize += calculateTotalSize(child, fileMap);
+        }
+        return totalSize;
+    }
+
+    // Helper function to get IDs of children of a file
+    private static List<Integer> getChildIds(File file, HashMap<Integer, File> fileMap) {
+        List<Integer> childIds = new ArrayList<>();
+        for (File otherFile : fileMap.values()) {
+            if (otherFile.parent() == file.id()) {
+                childIds.add(otherFile.id());
+            }
+        }
+        return childIds;
     }
 
     public static void main(String[] args) {
