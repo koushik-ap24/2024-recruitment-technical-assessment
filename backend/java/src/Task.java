@@ -106,7 +106,6 @@ public class Task {
         }
 
         return largestTotalSize;
-        //return 1;
     }
 
     // Recursive function to calculate total size of file and its children
@@ -164,7 +163,6 @@ public class Task {
         assert kLargestCategories(testFiles, 3).equals(List.of(
             "Documents", "Folder", "Media"
         ));
-
 
         assert largestFileSize(testFiles) == 20992;
     }
